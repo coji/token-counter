@@ -11,6 +11,7 @@
     "@remix-run/react": "^1.14.3",
     "@remix-run/vercel": "^1.14.3",
     "@vercel/node": "^2.6.2",
+    "daisyui": "^2.51.5",
     "gpt-3-encoder": "^1.1.4",
     "isbot": "latest",
     "react": "^18.2.0",
@@ -20,9 +21,11 @@
     "@remix-run/dev": "^1.14.3",
     "@remix-run/eslint-config": "^1.14.3",
     "@remix-run/serve": "^1.14.3",
+    "@types/node": "^18.15.5",
     "@types/react": "^18.0.25",
     "@types/react-dom": "^18.0.8",
     "eslint": "^8.27.0",
+    "tailwindcss": "^3.2.7",
     "typescript": "^4.8.4"
   },
   "prettier": {
