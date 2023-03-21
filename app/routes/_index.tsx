@@ -1,6 +1,6 @@
 import { type ActionArgs, json } from '@remix-run/node'
 import { useFetcher } from '@remix-run/react'
-import { encode } from '~/services/encode.server'
+import { countChatTokens } from '~/services/chat-token-counter.server'
 import {
   chatCompletion,
   type ChatCompletionRequestMessage,
@@ -28,7 +28,7 @@ export const action = async ({ request }: ActionArgs) => {
     process.env.OPENAI_API_KEY ?? '',
   )
 
-  const tokens = encode('gpt-3.5-turbo', messages)
+  const tokens = countChatTokens('gpt-3.5-turbo', messages)
   return json({ messages, estimated_tokens: tokens, response })
 }
 
@@ -40,7 +40,7 @@ export default function Index() {
   const fetcher = useFetcher<typeof action>()
 
   return (
-    <div className="font-sans leading-6 container max-w-lg mx-auto">
+    <div className="font-sans leading-6 container max-w-lg mx-auto grid grid-rows-[auto_1fr_auto] h-screen">
       <h1 className="text-4xl font-bold text-center my-16">Token Counter</h1>
 
       <fetcher.Form replace method="post" className="w-full">
@@ -57,10 +57,16 @@ export default function Index() {
           </button>
         </div>
 
-        <div className={classNames('font-mono py-2 px-4')}>
-          {JSON.stringify(fetcher.data)}
+        <div className={classNames('font-mono py-2 px-4 overflow-auto')}>
+          <pre>
+          {JSON.stringify(fetcher.data, null, 2)}
+          </pre>
         </div>
       </fetcher.Form>
+
+      <div className="text-center">
+        Copyright &copy; {new Date().getFullYear()} coji.
+      </div>
     </div>
   )
 }

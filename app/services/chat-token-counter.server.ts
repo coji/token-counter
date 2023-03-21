@@ -32,7 +32,7 @@ const tokensByModel = (
   throw new Error(`Unrecognized model: ${model}`)
 }
 
-export const encode = (
+export const countChatTokens = (
   model: ChatCompletionModel,
   messages: ChatCompletionRequestMessage[],
 ) => {
