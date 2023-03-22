@@ -9,21 +9,17 @@ export const useOpenAIApiKey = () => {
   }
 
   const apiKeyInput = (
-    <div className="form-control flex flex-row gap-2">
-      <label className="label" htmlFor="apiKey">
-        <span className="label-text">OpenAI API Key</span>
-      </label>
-      <input
-        id="apiKey"
-        name="apiKey"
-        className="input input-bordered w-full input-sm flex-1"
-        type="password"
-      ></input>
-      {apiKey}
-    </div>
+    <AppInput
+      name="apiKey"
+      label="OpenAI API Key"
+      onChange={handleChangeInput}
+      size="sm"
+      direction="horizontal"
+    />
   )
 
   return {
     apiKeyInput,
+    apiKey,
   }
 }

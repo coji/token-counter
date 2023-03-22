@@ -1,8 +1,6 @@
 import { type ActionArgs, json } from '@remix-run/node'
 import { useFetcher } from '@remix-run/react'
-import { ValidatedForm } from 'remix-validated-form'
 import { z } from 'zod'
-import { withZod } from '@remix-validated-form/with-zod'
 import { testEstimateChatTokens } from '~/services/chat-token-counter.server'
 import {
   chatCompletion,
@@ -12,9 +10,20 @@ import { useOpenAIApiKey } from '~/hooks/useOpenAIApiKey'
 import { AppInput } from '~/components/AppInput'
 import { classNames } from '~/utils/class-names'
 
+const schema = z.object({
+  input: z.string().min(1).max(1000),
+  apiKey: z.string().min(1).max(1000),
+})
+
 export const action = async ({ request }: ActionArgs) => {
+  // フォームデータを取得し検証
   const formData = await request.formData()
-  const input = formData.get('input') as string
+  const ret = schema.safeParse(Object.fromEntries(formData.entries()))
+  if (!ret.success) {
+    // エラー
+    return json({ error: ret.error }, { status: 400 })
+  }
+  const { input, apiKey } = ret.data
 
   // プロンプトのメッセージを作成
   const messages: ChatCompletionRequestMessage[] = [
@@ -48,25 +57,18 @@ export const action = async ({ request }: ActionArgs) => {
   const estimatedTokens = testEstimateChatTokens('gpt-3.5-turbo', messages)
 
   // ChatGPT APIを呼び出して応答を取得
-  const response = await chatCompletion(
-    'gpt-3.5-turbo',
-    messages,
-    process.env.OPENAI_API_KEY ?? '',
-  )
+  const response = await chatCompletion('gpt-3.5-turbo', messages, apiKey)
 
   return json({ messages, estimatedTokens, response })
 }
 
-const validator = withZod(
-  z.object({
-    input: z.string().min(1).max(1000),
-    apiKey: z.string().min(1).max(1000),
-  }),
-)
-
 export default function Index() {
   const fetcher = useFetcher<typeof action>()
-  const { apiKeyInput } = useOpenAIApiKey()
+  const { apiKeyInput, apiKey } = useOpenAIApiKey()
+
+  if (fetcher.data && 'error' in fetcher.data) {
+    console.log(fetcher.data.error)
+  }
 
   return (
     <div className="font-sans leading-6 mx-auto grid grid-rows-[auto_1fr_auto] h-screen">
@@ -75,15 +77,10 @@ export default function Index() {
         <h1 className="text-4xl font-bold text-center my-16">Token Counter</h1>
       </div>
 
-      <ValidatedForm
-        validator={validator}
-        fetcher={fetcher}
-        replace
-        method="post"
-        className="w-full"
-      >
+      <fetcher.Form replace method="post" className="w-full">
         <div className="flex gap-4 py-2 px-4 items-end">
-          <AppInput name="input" className="flex-1" />
+          <input type="hidden" name="apiKey" value={apiKey} />
+          <AppInput name="input" label="Prompt" className="flex-1" />
 
           <button
             className={classNames(
@@ -97,10 +94,20 @@ export default function Index() {
           </button>
         </div>
 
-        <div className={classNames('font-mono py-2 px-4 overflow-auto')}>
-          <pre>{JSON.stringify(fetcher.data, null, 2)}</pre>
-        </div>
-      </ValidatedForm>
+        {fetcher.data && 'error' in fetcher.data ? (
+          <div className="py-2 px-4">
+            {fetcher.data.error.issues.map((issue) => (
+              <div className="text-error" key={`issue-${issue.path}`}>
+                {issue.path}: {issue.message}
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className={classNames('font-mono py-2 px-4 overflow-auto')}>
+            <pre>{JSON.stringify(fetcher.data, null, 2)}</pre>
+          </div>
+        )}
+      </fetcher.Form>
 
       <div className="text-center">
         Copyright &copy; {new Date().getFullYear()} coji.

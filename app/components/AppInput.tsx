@@ -1,11 +1,11 @@
 import type { ComponentProps } from 'react'
-import { useField } from 'remix-validated-form'
 import { classNames } from '~/utils/class-names'
 
 interface AppInputProps extends Omit<ComponentProps<'input'>, 'size'> {
   name: string
   label?: string
   size?: 'xs' | 'sm' | 'md' | 'lg'
+  direction?: 'vertical' | 'horizontal'
   className?: string
 }
 export const AppInput = ({
@@ -13,19 +13,30 @@ export const AppInput = ({
   label,
   size = 'md',
   className = '',
+  direction = 'vertical',
   ...rest
 }: AppInputProps) => {
-  const { error, getInputProps } = useField(name)
   return (
-    <div className={classNames(className, 'form-control')}>
+    <div className={classNames(className, 'form-control block')}>
       {label && (
-        <label className="label" htmlFor={name}>
+        <label
+          className={classNames(
+            direction === 'vertical' ? 'block' : 'inline-block',
+            'label mr-2',
+          )}
+          htmlFor={name}
+        >
           <span className="label-text">{label}</span>
         </label>
       )}
       <input
-        {...getInputProps({ id: name })}
-        className={`input input-bordered w-full input-${size}`}
+        id={name}
+        name={name}
+        className={classNames(
+          direction === 'vertical' ? 'block w-full' : 'inline-block',
+          'input input-bordered',
+          `input-${size}`,
+        )}
         {...rest}
       ></input>
     </div>
