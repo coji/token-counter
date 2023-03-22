@@ -22,7 +22,7 @@ export const links: LinksFunction = () => [
 
 export default function App() {
   return (
-    <html lang="en">
+    <html lang="en" data-theme="winter">
       <head>
         <Meta />
         <Links />

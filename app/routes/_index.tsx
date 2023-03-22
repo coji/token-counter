@@ -1,5 +1,8 @@
 import { type ActionArgs, json } from '@remix-run/node'
 import { useFetcher } from '@remix-run/react'
+import { ValidatedForm } from 'remix-validated-form'
+import { z } from 'zod'
+import { withZod } from '@remix-validated-form/with-zod'
 import { testEstimateChatTokens } from '~/services/chat-token-counter.server'
 import {
   chatCompletion,
@@ -8,10 +11,10 @@ import {
 
 export const action = async ({ request }: ActionArgs) => {
   const formData = await request.formData()
-  const text = formData.get('text') as string
+  const input = formData.get('input') as string
 
   // プロンプトのメッセージを作成
-  const messages = [
+  const messages: ChatCompletionRequestMessage[] = [
     {
       role: 'system',
       content: 'You are a helpful AI assistant',
@@ -34,13 +37,13 @@ export const action = async ({ request }: ActionArgs) => {
     },
     {
       role: 'user',
-      content: text,
+      content: input,
     },
-  ] satisfies ChatCompletionRequestMessage[]
+  ]
 
   // トークン数を事前計算
   const estimatedTokens = testEstimateChatTokens('gpt-3.5-turbo', messages)
-  
+
   // ChatGPT APIを呼び出して応答を取得
   const response = await chatCompletion(
     'gpt-3.5-turbo',
@@ -55,6 +58,13 @@ const classNames = (...classes: string[]) => {
   return classes.filter(Boolean).join(' ')
 }
 
+const validator = withZod(
+  z.object({
+    input: z.string().min(1).max(1000),
+    apiKey: z.string().min(1).max(1000),
+  }),
+)
+
 export default function Index() {
   const fetcher = useFetcher<typeof action>()
 
@@ -62,26 +72,44 @@ export default function Index() {
     <div className="font-sans leading-6 mx-auto grid grid-rows-[auto_1fr_auto] h-screen">
       <h1 className="text-4xl font-bold text-center my-16">Token Counter</h1>
 
-      <fetcher.Form replace method="post" className="w-full">
+      <ValidatedForm
+        validator={validator}
+        fetcher={fetcher}
+        replace
+        method="post"
+        className="w-full"
+      >
         <div className="flex gap-4 py-2 px-4">
-          <input className="input flex-1" name="text" autoFocus />
+          <div className="form-control">
+            <label className="label">Input</label>
+            <input
+              className="input input-bordered flex-1"
+              name="input"
+              autoFocus
+            />
+          </div>
+
+          <div className="form-control">
+            <label className="label">API Key</label>
+            <input className="input input-bordered flex-1" name="apiKey" />
+          </div>
+
           <button
             className={classNames(
               fetcher.state !== 'idle' ? 'loading' : '',
               'btn btn-primary',
             )}
             type="submit"
+            disabled={fetcher.state !== 'idle'}
           >
             Count Tokens
           </button>
         </div>
 
         <div className={classNames('font-mono py-2 px-4 overflow-auto')}>
-          <pre>
-          {JSON.stringify(fetcher.data, null, 2)}
-          </pre>
+          <pre>{JSON.stringify(fetcher.data, null, 2)}</pre>
         </div>
-      </fetcher.Form>
+      </ValidatedForm>
 
       <div className="text-center">
         Copyright &copy; {new Date().getFullYear()} coji.
