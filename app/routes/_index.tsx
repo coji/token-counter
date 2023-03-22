@@ -8,6 +8,9 @@ import {
   chatCompletion,
   type ChatCompletionRequestMessage,
 } from '~/services/chatgpt-api.server'
+import { useOpenAIApiKey } from '~/hooks/useOpenAIApiKey'
+import { AppInput } from '~/components/AppInput'
+import { classNames } from '~/utils/class-names'
 
 export const action = async ({ request }: ActionArgs) => {
   const formData = await request.formData()
@@ -54,10 +57,6 @@ export const action = async ({ request }: ActionArgs) => {
   return json({ messages, estimatedTokens, response })
 }
 
-const classNames = (...classes: string[]) => {
-  return classes.filter(Boolean).join(' ')
-}
-
 const validator = withZod(
   z.object({
     input: z.string().min(1).max(1000),
@@ -67,10 +66,14 @@ const validator = withZod(
 
 export default function Index() {
   const fetcher = useFetcher<typeof action>()
+  const { apiKeyInput } = useOpenAIApiKey()
 
   return (
     <div className="font-sans leading-6 mx-auto grid grid-rows-[auto_1fr_auto] h-screen">
-      <h1 className="text-4xl font-bold text-center my-16">Token Counter</h1>
+      <div className="relative">
+        <div className="absolute right-4 top-4">{apiKeyInput}</div>
+        <h1 className="text-4xl font-bold text-center my-16">Token Counter</h1>
+      </div>
 
       <ValidatedForm
         validator={validator}
@@ -79,20 +82,8 @@ export default function Index() {
         method="post"
         className="w-full"
       >
-        <div className="flex gap-4 py-2 px-4">
-          <div className="form-control">
-            <label className="label">Input</label>
-            <input
-              className="input input-bordered flex-1"
-              name="input"
-              autoFocus
-            />
-          </div>
-
-          <div className="form-control">
-            <label className="label">API Key</label>
-            <input className="input input-bordered flex-1" name="apiKey" />
-          </div>
+        <div className="flex gap-4 py-2 px-4 items-end">
+          <AppInput name="input" className="flex-1" />
 
           <button
             className={classNames(
