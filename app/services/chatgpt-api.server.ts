@@ -1,8 +1,4 @@
-import type {
-  CreateChatCompletionRequest,
-  ChatCompletionRequestMessage,
-  ChatCompletionResponseMessage,
-} from 'openai'
+import type { ChatCompletionRequestMessage, ChatCompletionResponseMessage, CreateChatCompletionRequest } from 'openai'
 import type { ChatCompletionModel } from '~/types/chat-completion'
 export type { ChatCompletionRequestMessage, ChatCompletionResponseMessage }
 

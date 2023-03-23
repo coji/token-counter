@@ -9,13 +9,7 @@ export const useOpenAIApiKey = () => {
   }
 
   const apiKeyInput = (
-    <AppInput
-      name="apiKey"
-      label="OpenAI API Key"
-      onChange={handleChangeInput}
-      size="sm"
-      direction="horizontal"
-    />
+    <AppInput name="apiKey" label="OpenAI API Key" onChange={handleChangeInput} size="sm" direction="horizontal" />
   )
 
   return {

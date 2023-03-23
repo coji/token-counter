@@ -19,13 +19,7 @@ export const AppInput = ({
   return (
     <div className={classNames(className, 'form-control block')}>
       {label && (
-        <label
-          className={classNames(
-            direction === 'vertical' ? 'block' : 'inline-block',
-            'label mr-2',
-          )}
-          htmlFor={name}
-        >
+        <label className={classNames(direction === 'vertical' ? 'block' : 'inline-block', 'label mr-2')} htmlFor={name}>
           <span className="label-text">{label}</span>
         </label>
       )}

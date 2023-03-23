@@ -1,7 +1,7 @@
+import { encoding_for_model } from '@dqbd/tiktoken'
 import { encode as gpt3encode } from 'gpt-3-encoder'
 import type { ChatCompletionRequestMessage } from 'openai'
 import type { ChatCompletionModel } from '~/types/chat-completion'
-import { encoding_for_model } from '@dqbd/tiktoken'
 
 // reference: How to format inputs to ChatGPT models
 // https://github.com/openai/openai-cookbook/blob/main/examples/How_to_format_inputs_to_ChatGPT_models.ipynb
@@ -16,9 +16,7 @@ const tokensByModel = (
   tokensPerName: number
 } => {
   if (model === 'gpt-3.5-turbo') {
-    console.log(
-      'Warning: gpt-3.5-turbo may change over time. Returning num tokens assuming gpt-3.5-turbo-0301.',
-    )
+    console.log('Warning: gpt-3.5-turbo may change over time. Returning num tokens assuming gpt-3.5-turbo-0301.')
     return tokensByModel('gpt-3.5-turbo-0301')
   } else if (model === 'gpt-3.5-turbo-0301') {
     return {
@@ -34,10 +32,7 @@ const tokensByModel = (
   throw new Error(`Unrecognized model: ${model}`)
 }
 
-export const testEstimateChatTokens = (
-  model: ChatCompletionModel,
-  messages: ChatCompletionRequestMessage[],
-) => {
+export const testEstimateChatTokens = (model: ChatCompletionModel, messages: ChatCompletionRequestMessage[]) => {
   const enc = encoding_for_model(model)
   const { tokensPerMessage, tokensPerName } = tokensByModel(model)
 
@@ -57,10 +52,7 @@ export const testEstimateChatTokens = (
   return tokens
 }
 
-export const estimateChatTokens = (
-  model: ChatCompletionModel,
-  messages: ChatCompletionRequestMessage[],
-) => {
+export const estimateChatTokens = (model: ChatCompletionModel, messages: ChatCompletionRequestMessage[]) => {
   const { tokensPerMessage, tokensPerName } = tokensByModel(model)
 
   let tokens = 0

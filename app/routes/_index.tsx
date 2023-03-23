@@ -1,13 +1,10 @@
-import { type ActionArgs, json } from '@remix-run/node'
+import { json, type ActionArgs } from '@remix-run/node'
 import { useFetcher } from '@remix-run/react'
 import { z } from 'zod'
-import { testEstimateChatTokens } from '~/services/chat-token-counter.server'
-import {
-  chatCompletion,
-  type ChatCompletionRequestMessage,
-} from '~/services/chatgpt-api.server'
-import { useOpenAIApiKey } from '~/hooks/useOpenAIApiKey'
 import { AppInput } from '~/components/AppInput'
+import { useOpenAIApiKey } from '~/hooks/useOpenAIApiKey'
+import { testEstimateChatTokens } from '~/services/chat-token-counter.server'
+import { chatCompletion, type ChatCompletionRequestMessage } from '~/services/chatgpt-api.server'
 import { classNames } from '~/utils/class-names'
 
 const schema = z.object({
@@ -83,10 +80,7 @@ export default function Index() {
           <AppInput name="input" label="Prompt" className="flex-1" />
 
           <button
-            className={classNames(
-              fetcher.state !== 'idle' ? 'loading' : '',
-              'btn btn-primary',
-            )}
+            className={classNames(fetcher.state !== 'idle' ? 'loading' : '', 'btn btn-primary')}
             type="submit"
             disabled={fetcher.state !== 'idle'}
           >
@@ -109,9 +103,7 @@ export default function Index() {
         )}
       </fetcher.Form>
 
-      <div className="text-center">
-        Copyright &copy; {new Date().getFullYear()} coji.
-      </div>
+      <div className="text-center">Copyright &copy; {new Date().getFullYear()} coji.</div>
     </div>
   )
 }
