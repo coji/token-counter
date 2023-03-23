@@ -5,6 +5,7 @@ import { AppInput } from '~/components/AppInput'
 import { useOpenAIApiKey } from '~/hooks/useOpenAIApiKey'
 import { testEstimateChatTokens } from '~/services/chat-token-counter.server'
 import { chatCompletion, type ChatCompletionRequestMessage } from '~/services/chatgpt-api.server'
+import { sessionStorage } from '~/services/session.server'
 import { classNames } from '~/utils/class-names'
 
 const schema = z.object({
@@ -13,7 +14,9 @@ const schema = z.object({
 })
 
 export const loader = async ({ request }: LoaderArgs) => {
-  return json({})
+  const session = await sessionStorage.getSession(request.headers.get('Cookie') ?? '')
+  const apiKey = session.get('apiKey')
+  return json({ apiKey })
 }
 
 export const action = async ({ request }: ActionArgs) => {
@@ -64,9 +67,9 @@ export const action = async ({ request }: ActionArgs) => {
 }
 
 export default function Index() {
-  const data = useLoaderData<typeof loader>()
+  const { apiKey: storedApiKey } = useLoaderData<typeof loader>()
   const fetcher = useFetcher<typeof action>()
-  const { apiKeyInput, apiKey } = useOpenAIApiKey()
+  const { apiKeyInput, apiKey } = useOpenAIApiKey(storedApiKey)
 
   if (fetcher.data && 'error' in fetcher.data) {
     console.log(fetcher.data.error)
