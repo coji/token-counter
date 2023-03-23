@@ -1,5 +1,5 @@
-import { json, type ActionArgs } from '@remix-run/node'
-import { useFetcher } from '@remix-run/react'
+import { useFetcher, useLoaderData } from '@remix-run/react'
+import { json, type ActionArgs, type LoaderArgs } from '@vercel/remix'
 import { z } from 'zod'
 import { AppInput } from '~/components/AppInput'
 import { useOpenAIApiKey } from '~/hooks/useOpenAIApiKey'
@@ -11,6 +11,10 @@ const schema = z.object({
   input: z.string().min(1).max(1000),
   apiKey: z.string().min(1).max(1000),
 })
+
+export const loader = async ({ request }: LoaderArgs) => {
+  return json({})
+}
 
 export const action = async ({ request }: ActionArgs) => {
   // フォームデータを取得し検証
@@ -60,6 +64,7 @@ export const action = async ({ request }: ActionArgs) => {
 }
 
 export default function Index() {
+  const data = useLoaderData<typeof loader>()
   const fetcher = useFetcher<typeof action>()
   const { apiKeyInput, apiKey } = useOpenAIApiKey()
 
