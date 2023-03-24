@@ -6,7 +6,7 @@ module.exports = {
   safelist: ['input-xs', 'input-sm', 'input-md', 'input-lg'],
   theme: {
     extend: {
-      fontFamily: { sans: ['Inter var', ...defaultTheme.fontFamily.sans] },
+      fontFamily: { sans: [...defaultTheme.fontFamily.sans] },
     },
   },
   plugins: [require('daisyui')],
