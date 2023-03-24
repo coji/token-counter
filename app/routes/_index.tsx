@@ -1,9 +1,9 @@
 import { Form, useActionData, useLoaderData, useNavigation } from '@remix-run/react'
 import { json, type ActionArgs, type LoaderArgs } from '@vercel/remix'
 import { z } from 'zod'
-import { AppInput } from '~/components/AppInput'
+import { AppCard, AppCardBody, AppCardTitle, AppInput } from '~/components'
 import { useOpenAIApiKey } from '~/hooks/useOpenAIApiKey'
-import { testEstimateChatTokens } from '~/services/chat-token-counter.server'
+import { estimateChatMessagesTokens } from '~/services/chat-token-counter.server'
 import { chatCompletion, type ChatCompletionRequestMessage } from '~/services/chatgpt-api.server'
 import { sessionStorage } from '~/services/session.server'
 import { classNames } from '~/utils/class-names'
@@ -53,7 +53,7 @@ export const action = async ({ request }: ActionArgs) => {
   ]
 
   // トークン数を事前計算
-  const estimatedTokens = testEstimateChatTokens('gpt-3.5-turbo', messages)
+  const estimatedTokens = estimateChatMessagesTokens('tiktoken', 'gpt-3.5-turbo', messages)
 
   // ChatGPT APIを呼び出して応答を取得
   const response = await chatCompletion('gpt-3.5-turbo', messages, apiKey)
@@ -80,26 +80,34 @@ export default function Index() {
         <h1 className="text-4xl font-bold text-center my-16">Token Counter</h1>
       </div>
 
-      <Form replace method="post" className="w-full">
-        <div className="flex gap-4 py-2 px-4 items-end">
-          <input type="hidden" name="apiKey" value={apiKey} />
-          <AppInput name="input" label="Prompt" className="flex-1" />
+      <div className="">
+        <Form replace method="post" className="w-full">
+          <div className="flex gap-4 py-2 px-4 items-end">
+            <input type="hidden" name="apiKey" value={apiKey} />
+            <AppInput name="input" label="Prompt" className="flex-1" />
 
-          <button
-            className={classNames(navigation.state !== 'idle' ? 'loading' : '', 'btn btn-primary')}
-            type="submit"
-            disabled={navigation.state !== 'idle' || !apiKey}
-          >
-            Count Tokens
-          </button>
-        </div>
+            <button
+              className={classNames(navigation.state !== 'idle' ? 'loading' : '', 'btn btn-primary')}
+              type="submit"
+              disabled={navigation.state !== 'idle' || !apiKey}
+            >
+              Count Tokens
+            </button>
+          </div>
+        </Form>
 
-        <div className={classNames('font-mono py-2 px-4 overflow-auto')}>
-          <pre>{JSON.stringify(actionData?.estimatedTokens, null, 2)}</pre>
-          <pre>{JSON.stringify(actionData?.messages, null, 2)}</pre>
-          <pre>{JSON.stringify(actionData?.response, null, 2)}</pre>
-        </div>
-      </Form>
+        {actionData && (
+          <div>
+            <AppCard>
+              <AppCardTitle>Estimated Tokens</AppCardTitle>
+              <AppCardBody>{actionData.estimatedTokens}</AppCardBody>
+            </AppCard>
+
+            <div className="card">{JSON.stringify(actionData?.messages, null, 2)}</div>
+            <div className="card">{JSON.stringify(actionData?.response, null, 2)}</div>
+          </div>
+        )}
+      </div>
 
       <div className="text-center">Copyright &copy; {new Date().getFullYear()} coji.</div>
     </div>
