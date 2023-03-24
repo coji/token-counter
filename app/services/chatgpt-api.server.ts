@@ -5,8 +5,19 @@ export type { ChatCompletionRequestMessage, ChatCompletionResponseMessage }
 export const chatCompletion = async (
   model: ChatCompletionModel,
   messages: ChatCompletionRequestMessage[],
-  apiKey: string,
-) => {
+  apiKey: string | undefined,
+): Promise<ChatCompletionResponseMessage> => {
+  if (!apiKey) {
+    throw new Error('invalid ChatGPT API key specified.')
+  }
+
+  if (process.env.NODE_ENV === 'development') {
+    return Promise.resolve({
+      role: 'assistant',
+      content: 'Here is a ChatGPT API Response!',
+    })
+  }
+
   const request: CreateChatCompletionRequest = {
     model: 'gpt-3.5-turbo',
     temperature: 0.7,
