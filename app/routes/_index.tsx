@@ -1,4 +1,4 @@
-import { useFetcher, useLoaderData } from '@remix-run/react'
+import { Form, useActionData, useLoaderData, useNavigation } from '@remix-run/react'
 import { json, type ActionArgs, type LoaderArgs } from '@vercel/remix'
 import { z } from 'zod'
 import { AppInput } from '~/components/AppInput'
@@ -22,12 +22,7 @@ export const loader = async ({ request }: LoaderArgs) => {
 export const action = async ({ request }: ActionArgs) => {
   // フォームデータを取得し検証
   const formData = await request.formData()
-  const ret = schema.safeParse(Object.fromEntries(formData.entries()))
-  if (!ret.success) {
-    // エラー
-    return json({ error: ret.error }, { status: 400 })
-  }
-  const { input, apiKey } = ret.data
+  const { input, apiKey } = schema.parse(Object.fromEntries(formData.entries()))
 
   // プロンプトのメッセージを作成
   const messages: ChatCompletionRequestMessage[] = [
@@ -63,17 +58,20 @@ export const action = async ({ request }: ActionArgs) => {
   // ChatGPT APIを呼び出して応答を取得
   const response = await chatCompletion('gpt-3.5-turbo', messages, apiKey)
 
-  return json({ messages, estimatedTokens, response })
+  return json({
+    messages,
+    estimatedTokens,
+    response,
+  })
 }
 
 export default function Index() {
   const { apiKey: storedApiKey } = useLoaderData<typeof loader>()
-  const fetcher = useFetcher<typeof action>()
-  const { apiKeyInput, apiKey } = useOpenAIApiKey(storedApiKey)
+  const actionData = useActionData<typeof action>()
+  console.log(actionData)
+  const navigation = useNavigation()
 
-  if (fetcher.data && 'error' in fetcher.data) {
-    console.log(fetcher.data.error)
-  }
+  const { apiKeyInput, apiKey } = useOpenAIApiKey(storedApiKey)
 
   return (
     <div className="font-sans leading-6 mx-auto grid grid-rows-[auto_1fr_auto] h-screen">
@@ -82,34 +80,26 @@ export default function Index() {
         <h1 className="text-4xl font-bold text-center my-16">Token Counter</h1>
       </div>
 
-      <fetcher.Form replace method="post" className="w-full">
+      <Form replace method="post" className="w-full">
         <div className="flex gap-4 py-2 px-4 items-end">
           <input type="hidden" name="apiKey" value={apiKey} />
           <AppInput name="input" label="Prompt" className="flex-1" />
 
           <button
-            className={classNames(fetcher.state !== 'idle' ? 'loading' : '', 'btn btn-primary')}
+            className={classNames(navigation.state !== 'idle' ? 'loading' : '', 'btn btn-primary')}
             type="submit"
-            disabled={fetcher.state !== 'idle'}
+            disabled={navigation.state !== 'idle' || !apiKey}
           >
             Count Tokens
           </button>
         </div>
 
-        {fetcher.data && 'error' in fetcher.data ? (
-          <div className="py-2 px-4">
-            {fetcher.data.error.issues.map((issue) => (
-              <div className="text-error" key={`issue-${issue.path}`}>
-                {issue.path}: {issue.message}
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className={classNames('font-mono py-2 px-4 overflow-auto')}>
-            <pre>{JSON.stringify(fetcher.data, null, 2)}</pre>
-          </div>
-        )}
-      </fetcher.Form>
+        <div className={classNames('font-mono py-2 px-4 overflow-auto')}>
+          <pre>{JSON.stringify(actionData?.estimatedTokens, null, 2)}</pre>
+          <pre>{JSON.stringify(actionData?.messages, null, 2)}</pre>
+          <pre>{JSON.stringify(actionData?.response, null, 2)}</pre>
+        </div>
+      </Form>
 
       <div className="text-center">Copyright &copy; {new Date().getFullYear()} coji.</div>
     </div>
