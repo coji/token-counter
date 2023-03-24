@@ -76,7 +76,10 @@ export default function Index() {
     <div className="font-sans leading-6 mx-auto grid grid-rows-[auto_1fr_auto] h-screen">
       <div className="relative">
         <div className="absolute right-4 top-0">{apiKeyInput}</div>
-        <h1 className="text-4xl font-bold text-center my-16">Token Counter</h1>
+        <h1 className="text-4xl font-bold text-center my-16">
+          <div>Token Counter</div>
+          <div className="text-slate-500 text-sm">for ChatGPT API</div>
+        </h1>
       </div>
 
       <div>
@@ -85,13 +88,13 @@ export default function Index() {
             <input type="hidden" name="apiKey" value={apiKey} />
 
             <AppSelect label="Model" name="model">
-              <option selected value="gpt-4">
+              <option value="gpt-4" selected>
                 gpt-4
               </option>
-              <option value="gpt-3.5-turbo">gpt-3.5-turbo</option>
+              <option defaultValue="gpt-3.5-turbo">gpt-3.5-turbo</option>
             </AppSelect>
 
-            <AppInput name="input" label="Prompt" className="flex-1" />
+            <AppInput name="input" label="User input" className="flex-1" />
 
             <AppButton type="submit" disabled={navigation.state !== 'idle' || !apiKey}>
               Count Tokens
