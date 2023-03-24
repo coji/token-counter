@@ -1,13 +1,14 @@
 import { Form, useActionData, useLoaderData, useNavigation } from '@remix-run/react'
 import { json, type ActionArgs, type LoaderArgs } from '@vercel/remix'
 import { z } from 'zod'
-import { AppButton, AppCard, AppCardBody, AppCardTitle, AppInput } from '~/components'
+import { AppButton, AppCard, AppCardBody, AppCardTitle, AppInput, AppSelect } from '~/components'
 import { useOpenAIApiKey } from '~/hooks/useOpenAIApiKey'
 import { chatCompletion, type ChatCompletionRequestMessage } from '~/services/chatgpt-api.server'
 import { sessionStorage } from '~/services/session.server'
 import { countTokens } from '~/services/token-count.server'
 
 const schema = z.object({
+  model: z.enum(['gpt-3.5-turbo', 'gpt-4']),
   input: z.string(),
   apiKey: z.string().min(1).max(1000),
 })
@@ -21,7 +22,7 @@ export const loader = async ({ request }: LoaderArgs) => {
 export const action = async ({ request }: ActionArgs) => {
   // フォームデータを取得し検証
   const formData = await request.formData()
-  const { input, apiKey } = schema.parse(Object.fromEntries(formData.entries()))
+  const { model, input, apiKey } = schema.parse(Object.fromEntries(formData.entries()))
 
   // プロンプトのメッセージを作成
   const messages: ChatCompletionRequestMessage[] = [
@@ -52,7 +53,7 @@ export const action = async ({ request }: ActionArgs) => {
   ]
 
   // トークン数を事前計算
-  const countedTokens = countTokens('tiktoken', 'gpt-3.5-turbo', messages)
+  const countedTokens = countTokens('tiktoken', model, messages)
 
   // ChatGPT APIを呼び出して応答を取得
   const response = await chatCompletion('gpt-3.5-turbo', messages, apiKey)
@@ -75,14 +76,22 @@ export default function Index() {
   return (
     <div className="font-sans leading-6 mx-auto grid grid-rows-[auto_1fr_auto] h-screen">
       <div className="relative">
-        <div className="absolute right-4 top-4">{apiKeyInput}</div>
+        <div className="absolute right-4 top-0">{apiKeyInput}</div>
         <h1 className="text-4xl font-bold text-center my-16">Token Counter</h1>
       </div>
 
-      <div className="">
+      <div>
         <Form replace method="post" className="w-full">
           <div className="flex gap-4 py-2 px-4 items-end">
             <input type="hidden" name="apiKey" value={apiKey} />
+
+            <AppSelect label="Model" name="model">
+              <option selected value="gpt-4">
+                gpt-4
+              </option>
+              <option value="gpt-3.5-turbo">gpt-3.5-turbo</option>
+            </AppSelect>
+
             <AppInput name="input" label="Prompt" className="flex-1" />
 
             <AppButton type="submit" disabled={navigation.state !== 'idle' || !apiKey}>
