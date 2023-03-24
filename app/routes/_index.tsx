@@ -92,23 +92,23 @@ export default function Index() {
         </Form>
 
         {actionData && (
-          <div className="grid grid-cols-3 gap-4 p-4">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 p-4">
             <AppCard>
               <AppCardTitle>Prompt</AppCardTitle>
-              <AppCardBody className="p-4 overflow-auto">
-                <pre>{JSON.stringify(actionData.messages, null, 2)}</pre>
+              <AppCardBody>
+                <pre className="overflow-auto text-xs">{JSON.stringify(actionData.messages, null, 2)}</pre>
               </AppCardBody>
             </AppCard>
 
             <AppCard>
-              <AppCardTitle>Counted Tokens</AppCardTitle>
+              <AppCardTitle>Prompt Tokens Counted</AppCardTitle>
               <AppCardBody>{actionData.countedTokens}</AppCardBody>
             </AppCard>
 
             <AppCard>
               <AppCardTitle>API Response</AppCardTitle>
-              <AppCardBody className="p-4 overflow-auto">
-                <pre>{JSON.stringify(actionData.response, null, 2)}</pre>
+              <AppCardBody>
+                <pre className="overflow-auto text-xs">{JSON.stringify(actionData.response, null, 2)}</pre>
               </AppCardBody>
             </AppCard>
           </div>
