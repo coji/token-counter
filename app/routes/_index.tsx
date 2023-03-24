@@ -1,15 +1,14 @@
 import { Form, useActionData, useLoaderData, useNavigation } from '@remix-run/react'
 import { json, type ActionArgs, type LoaderArgs } from '@vercel/remix'
 import { z } from 'zod'
-import { AppCard, AppCardBody, AppCardTitle, AppInput } from '~/components'
+import { AppButton, AppCard, AppCardBody, AppCardTitle, AppInput } from '~/components'
 import { useOpenAIApiKey } from '~/hooks/useOpenAIApiKey'
-import { estimateChatMessagesTokens } from '~/services/chat-token-counter.server'
 import { chatCompletion, type ChatCompletionRequestMessage } from '~/services/chatgpt-api.server'
 import { sessionStorage } from '~/services/session.server'
-import { classNames } from '~/utils/class-names'
+import { countTokens } from '~/services/token-count.server'
 
 const schema = z.object({
-  input: z.string().min(1).max(1000),
+  input: z.string(),
   apiKey: z.string().min(1).max(1000),
 })
 
@@ -53,14 +52,14 @@ export const action = async ({ request }: ActionArgs) => {
   ]
 
   // トークン数を事前計算
-  const estimatedTokens = estimateChatMessagesTokens('tiktoken', 'gpt-3.5-turbo', messages)
+  const countedTokens = countTokens('tiktoken', 'gpt-3.5-turbo', messages)
 
   // ChatGPT APIを呼び出して応答を取得
   const response = await chatCompletion('gpt-3.5-turbo', messages, apiKey)
 
   return json({
     messages,
-    estimatedTokens,
+    countedTokens,
     response,
   })
 }
@@ -86,25 +85,32 @@ export default function Index() {
             <input type="hidden" name="apiKey" value={apiKey} />
             <AppInput name="input" label="Prompt" className="flex-1" />
 
-            <button
-              className={classNames(navigation.state !== 'idle' ? 'loading' : '', 'btn btn-primary')}
-              type="submit"
-              disabled={navigation.state !== 'idle' || !apiKey}
-            >
+            <AppButton type="submit" disabled={navigation.state !== 'idle' || !apiKey}>
               Count Tokens
-            </button>
+            </AppButton>
           </div>
         </Form>
 
         {actionData && (
-          <div>
+          <div className="grid grid-cols-3 gap-4 p-4">
             <AppCard>
-              <AppCardTitle>Estimated Tokens</AppCardTitle>
-              <AppCardBody>{actionData.estimatedTokens}</AppCardBody>
+              <AppCardTitle>Prompt</AppCardTitle>
+              <AppCardBody className="p-4 overflow-auto">
+                <pre>{JSON.stringify(actionData.messages, null, 2)}</pre>
+              </AppCardBody>
             </AppCard>
 
-            <div className="card">{JSON.stringify(actionData?.messages, null, 2)}</div>
-            <div className="card">{JSON.stringify(actionData?.response, null, 2)}</div>
+            <AppCard>
+              <AppCardTitle>Counted Tokens</AppCardTitle>
+              <AppCardBody>{actionData.countedTokens}</AppCardBody>
+            </AppCard>
+
+            <AppCard>
+              <AppCardTitle>API Response</AppCardTitle>
+              <AppCardBody className="p-4 overflow-auto">
+                <pre>{JSON.stringify(actionData.response, null, 2)}</pre>
+              </AppCardBody>
+            </AppCard>
           </div>
         )}
       </div>

@@ -41,7 +41,7 @@ const tokensByModel = (
  * @param messages プロンプト。ChatCompletion API リクエストの messages オブジェクトの形式
  * @returns
  */
-export const estimateChatMessagesTokens = (
+export const countTokens = (
   tokenEncoderType: TokenEncoderType,
   model: ChatCompletionModel,
   messages: ChatCompletionRequestMessage[],
