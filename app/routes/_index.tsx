@@ -68,7 +68,6 @@ export const action = async ({ request }: ActionArgs) => {
 export default function Index() {
   const { apiKey: storedApiKey } = useLoaderData<typeof loader>()
   const actionData = useActionData<typeof action>()
-  console.log(actionData)
   const navigation = useNavigation()
 
   const { apiKeyInput, apiKey } = useOpenAIApiKey(storedApiKey)
