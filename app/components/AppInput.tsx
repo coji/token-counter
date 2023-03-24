@@ -32,7 +32,7 @@ export const AppInput = ({
           `input-${size}`,
         )}
         {...rest}
-      ></input>
+      />
     </div>
   )
 }
