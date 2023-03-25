@@ -53,7 +53,10 @@ export const action = async ({ request }: ActionArgs) => {
   ]
 
   // トークン数を事前計算
-  const countedTokens = countTokens('tiktoken', model, messages)
+  const countedTokens = {
+    tiktoken: countTokens('tiktoken', model, messages),
+    'gpt-3-encoder': countTokens('gpt-3-encoder', model, messages),
+  }
 
   // ChatGPT APIを呼び出して応答を取得
   const response = await chatCompletion('gpt-3.5-turbo', messages, apiKey)
@@ -113,7 +116,10 @@ export default function Index() {
 
             <AppCard>
               <AppCardTitle>Prompt Tokens Counted</AppCardTitle>
-              <AppCardBody>{actionData.countedTokens}</AppCardBody>
+              <AppCardBody>
+                <div>tiktoken: {actionData.countedTokens['tiktoken']}</div>
+                <div>gpt-3-encoder: {actionData.countedTokens['gpt-3-encoder']}</div>
+              </AppCardBody>
             </AppCard>
 
             <AppCard>
