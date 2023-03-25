@@ -132,7 +132,14 @@ export default function Index() {
         )}
       </div>
 
-      <div className="text-center">Copyright &copy; {new Date().getFullYear()} coji.</div>
+      <div className="text-center">
+        <div>Copyright &copy; {new Date().getFullYear()} coji.</div>
+        <div>
+          <a href="https://github.com/coji/token-counter" target="_blank" rel="noreferrer">
+            GitHub
+          </a>
+        </div>
+      </div>
     </div>
   )
 }
