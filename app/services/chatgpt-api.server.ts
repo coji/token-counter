@@ -15,7 +15,7 @@ export const chatCompletion = async (
   }
 
   const request: CreateChatCompletionRequest = {
-    model: 'gpt-3.5-turbo',
+    model,
     temperature: 0.7,
     top_p: 1,
     n: 1,
