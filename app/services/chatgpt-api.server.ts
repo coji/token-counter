@@ -7,11 +7,7 @@ export const chatCompletion = async (
   messages: ChatCompletionRequestMessage[],
   apiKey: string | undefined,
 ): Promise<ChatCompletionResponseMessage> => {
-  if (!apiKey) {
-    throw new Error('invalid ChatGPT API key specified.')
-  }
-
-  if (process.env.NODE_ENV === 'development') {
+  if (process.env.NODE_ENV === 'development' && !apiKey) {
     return Promise.resolve({
       role: 'assistant',
       content: 'Here is a ChatGPT API Response!',

@@ -10,7 +10,7 @@ import { countTokens } from '~/services/token-count.server'
 const schema = z.object({
   model: z.enum(['gpt-3.5-turbo', 'gpt-4']),
   input: z.string(),
-  apiKey: z.string().min(1).max(1000),
+  apiKey: z.string().optional(),
 })
 
 export const loader = async ({ request }: LoaderArgs) => {
@@ -59,7 +59,7 @@ export const action = async ({ request }: ActionArgs) => {
   }
 
   // ChatGPT APIを呼び出して応答を取得
-  const response = await chatCompletion('gpt-3.5-turbo', messages, apiKey)
+  const response = await chatCompletion(model, messages, apiKey)
 
   return json({
     messages,
@@ -99,7 +99,7 @@ export default function Index() {
 
             <AppInput name="input" label="User input" className="flex-1" />
 
-            <AppButton type="submit" disabled={navigation.state !== 'idle' || !apiKey}>
+            <AppButton type="submit" disabled={navigation.state !== 'idle'} isLoading={navigation.state !== 'idle'}>
               Count Tokens
             </AppButton>
           </div>
